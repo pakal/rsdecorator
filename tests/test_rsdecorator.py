@@ -134,3 +134,62 @@ def test_resolving_decorator_preserves_metadata_and_errors():
         myfunc(1, 2, 3)
     with pytest.raises(TypeError):
         myfunc()
+
+
+def test_flatten_function_signature_keyword_only_without_varargs():
+    # keyword-only arguments can exist without *args/**kwargs being used at all
+    def f(a, *, b=5):
+        return locals()
+
+    new_f = flatten_function_signature(f)
+    assert resolve_call_args(new_f, 1) == f(1)
+    assert resolve_call_args(new_f, 1, b=9) == f(1, b=9)
+
+
+def test_resolving_decorator_requires_a_caller():
+    with pytest.raises(AssertionError):
+        resolving_decorator(None)
+
+
+def test_resolving_decorator_one_shot_call_form():
+    # resolving_decorator(caller) returns a reusable decorator (partial),
+    # but resolving_decorator(caller, func) can also be called directly in one shot;
+    # both forms must behave identically
+    def caller(func, **all_kwargs):
+        return func(**all_kwargs)
+
+    def target(x, y=2):
+        return x + y
+
+    decorated_via_partial = resolving_decorator(caller)(target)
+    decorated_direct = resolving_decorator(caller, target)
+
+    assert decorated_via_partial(1) == decorated_direct(1) == 3
+    assert decorated_via_partial(1, 5) == decorated_direct(1, 5) == 6
+
+
+def test_exceptions_propagate_through_resolving_decorator():
+
+    @resolving_decorator
+    def passthrough(func, **all_kwargs):
+        return func(**all_kwargs)
+
+    # exception raised by the wrapped function itself
+    @passthrough
+    def raiser(x):
+        raise ValueError("boom")
+
+    with pytest.raises(ValueError, match="boom"):
+        raiser(1)
+
+    # exception raised by the caller logic before/instead of calling func
+    @resolving_decorator
+    def caller_raiser(func, **all_kwargs):
+        raise KeyError("caller failed")
+
+    @caller_raiser
+    def inner(x):
+        return x
+
+    with pytest.raises(KeyError, match="caller failed"):
+        inner(1)
