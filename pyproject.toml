@@ -39,8 +39,11 @@ test = [
 [project.urls]
 Homepage = "https://gist.github.com/pakal/dac20a15d4216b0584f0b369a78255b3"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.setuptools]
+py-modules = ["rsdecorator"]
+
+[tool.setuptools.package-dir]
+"" = "src"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
