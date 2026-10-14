@@ -2,7 +2,9 @@
 
 An alternative to `@decorator` which allows you to easily fiddle with pre-resolved arguments, before transferring control to the wrapped function.
 
-See the original gist: https://gist.github.com/pakal/dac20a15d4216b0584f0b369a78255b3
+See the project repository: https://github.com/pakal/rsdecorator
+
+Originally published as a gist: https://gist.github.com/pakal/dac20a15d4216b0584f0b369a78255b3
 
 ## Installation
 

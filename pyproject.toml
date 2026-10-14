@@ -38,7 +38,7 @@ test = [
 ]
 
 [project.urls]
-Homepage = "https://gist.github.com/pakal/dac20a15d4216b0584f0b369a78255b3"
+Homepage = "https://github.com/pakal/rsdecorator"
 
 [tool.setuptools]
 py-modules = ["rsdecorator"]
