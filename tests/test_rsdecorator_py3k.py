@@ -31,10 +31,3 @@ def test_py3k_resolving_decorator():
     res2 = new_advanced(**dict(a=1, b=2, c=3, d=(4,5), kw1="a", kwother=66, e=dict(kw2="b")))    
         
     assert res1 == res2, (res1, res2)
-    
-    return True
-
-
-if __name__ == "__main__":
-    assert test_py3k_resolving_decorator()
-    print("All tests OK")

@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import print_function, unicode_literals
-
-
 from rsdecorator import *
 
 
@@ -51,11 +47,3 @@ def test_common_resolving_decorator():
     assert func3(1, 8) == (8,)
     assert func4(1) == "<SESSION>"
     assert func4(1, my=8) == dict(my=8)
-
-    return True
-    
-
-
-if __name__ == "__main__":
-    assert test_common_resolving_decorator()
-    print("All tests OK")
