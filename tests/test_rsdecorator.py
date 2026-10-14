@@ -1,3 +1,7 @@
+import inspect
+
+import pytest
+
 from rsdecorator import *
 
 
@@ -76,3 +80,57 @@ def test_resolving_decorator_advanced_signature():
     res2 = new_advanced(**dict(a=1, b=2, c=3, d=(4,5), kw1="a", kwother=66, e=dict(kw2="b")))
 
     assert res1 == res2, (res1, res2)
+
+
+def test_flatten_function_signature_positional_only_arguments():
+    # Regression test: co_posonlyargcount must be reset too, else
+    # CodeType.replace() raises "bad argument to internal function".
+    def f(a, b, /, c=3, **kwargs):
+        return locals()
+
+    new_f = flatten_function_signature(f)
+
+    assert resolve_call_args(new_f, 1, 2) == f(1, 2)
+    assert resolve_call_args(new_f, 1, 2, c=9, extra=True) == f(1, 2, c=9, extra=True)
+
+    # positional-only-ness is only relevant for the *original* callable;
+    # once flattened, everything is keyword-only, including former
+    # positional-only arguments
+    assert new_f.resolve_call_args(a=1, b=2) == f(1, 2)
+
+
+def test_flatten_function_signature_no_arguments():
+    def f():
+        return locals()
+
+    new_f = flatten_function_signature(f)
+    assert resolve_call_args(new_f) == {}
+    assert new_f() == {}
+
+
+def test_resolving_decorator_preserves_metadata_and_errors():
+
+    @resolving_decorator
+    def passthrough(func, **all_kwargs):
+        return func(**all_kwargs)
+
+    @passthrough
+    def myfunc(x, y=2):
+        """myfunc docstring"""
+        return x + y
+
+    # metadata from the original function must be preserved
+    assert myfunc.__name__ == "myfunc"
+    assert myfunc.__doc__ == "myfunc docstring"
+    assert str(inspect.signature(myfunc)) == "(x, y=2)"
+
+    # normal calls still work
+    assert myfunc(1) == 3
+    assert myfunc(1, 5) == 6
+
+    # calling with wrong arity still raises a normal TypeError,
+    # exactly as it would for the undecorated function
+    with pytest.raises(TypeError):
+        myfunc(1, 2, 3)
+    with pytest.raises(TypeError):
+        myfunc()

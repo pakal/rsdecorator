@@ -127,6 +127,7 @@ def flatten_function_signature(func):
     # across python versions (eg. co_posonlyargcount, co_exceptiontable...).
     new_code_object = old_code_object.replace(
         co_argcount=0,
+        co_posonlyargcount=0,
         co_kwonlyargcount=argcount,  # ALL are kwd-only arguments now
         co_flags=flags,
     )
